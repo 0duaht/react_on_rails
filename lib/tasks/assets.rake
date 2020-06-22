@@ -2,13 +2,13 @@
 
 require "active_support"
 
-if Rake::Task.task_defined?("assets:precompile")
+# if Rake::Task.task_defined?("assets:precompile")
   Rake::Task["assets:precompile"].enhance do
     Rake::Task["react_on_rails:assets:webpack"].invoke
   end
-else
-  Rake::Task.define_task("assets:precompile" => ["react_on_rails:assets:webpack"])
-end
+# else
+#   Rake::Task.define_task("assets:precompile" => ["react_on_rails:assets:webpack"])
+# end
 
 # Sprockets independent tasks
 namespace :react_on_rails do
