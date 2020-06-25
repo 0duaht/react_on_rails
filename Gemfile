@@ -38,3 +38,5 @@ gem "webpacker", ">= 4.0.0"
 
 gem "equivalent-xml", github: "mbklein/equivalent-xml"
 gem "rainbow"
+gem "faraday"
+gem "typhoeus"
