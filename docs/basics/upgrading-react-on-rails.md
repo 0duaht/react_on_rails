@@ -1,35 +1,80 @@
 # Upgrading React on Rails
 
 ## Need Help Migrating?
-If you would like help in migrating between React on Rails versions or help with implementing server rendering, please contact [justin@shakacode.com](mailto:justin@shakacode.com) for information about our [ShakaCode Pro Support](https://www.shakacode.com/work/shakacode-pro-support.pdf).
+If you would like help in migrating between React on Rails versions or help with implementing server rendering, please contact [justin@shakacode.com](mailto:justin@shakacode.com) for more information about our [React on Rails Pro Support](https://www.shakacode.com/react-on-rails-pro).
 
-We specialize in helping companies to quickly and efficiently move from versions before 9 to current. The older versions use the Rails asset pipeline to package client assets. The current and recommended way is to use Webpack 4 for asset preparation. You may also need help migrating from the `rails/webpacker`'s Webpack configuration to a better setup ready for Server Side Rendering.
+We specialize in helping companies to quickly and efficiently upgrade. The older versions use the Rails asset pipeline to package client assets. The current and recommended way is to use Webpack 4+ for asset preparation. You may also need help migrating from the `rails/webpacker`'s Webpack configuration to a better setup ready for Server Side Rendering.
 
 ## Upgrading to v12
-* Make sure that you are on a relatively more recent version of rails and webpacker.
-* Updated API for ReactOnRails.register.
+### Recent versions
+Make sure that you are on a relatively more recent version of rails and webpacker. Yes, the [rails/webpacker](https://github.com/rails/webpacker) gem is required!
+v12 is tested on Rails 6. It should work on Rails v5. If you're on any older version,
+and v12 doesn't work, please file an issue. 
+
+### Removed Configuration config.symlink_non_digested_assets_regex
+Remove `config.symlink_non_digested_assets_regex` from your `config/initializers/react_on_rails.rb`.
+If you still need that feature, please file an issue.
+
+### i18n default format changed to JSON
+* If you're using the internalization helper, then set `config.i18n_output_format = 'js'`. You can
+  later update to the default JSON format as you will need to update your usage of that file. A JSON
+  format is more efficient.
+
+### Updated API for `ReactOnRails.register()`
 
 In order to solve the issues regarding React Hooks compatibility, the number of parameters
-for functions is used to determine if you have a render function that will get invoked to
+for functions is used to determine if you have a Render-Function that will get invoked to
 return a React component, or you are registering a React component defined by a function.
+Please see [Render-Functions and the Rails Context](./render-functions-and-railscontext.md) for
+more information on what a Render-Function is.
 
-Registered Objects are of the following types:
+##### Update required for registered functions taking exactly 2 params.
 
-##### Correct
-Either of these will work:
-1. Take **2 params** and return **a React function or class component**. A function component is a function
-   that takes zero or one params and returns a React Element, like JSX.
-    ```js
-    export default (props, _railsContext) => () => <Component {...props} />;
-    ```
-
-2. Take only zero or one params and you return a React Element, often JSX.
+Registered Objects are of the following type:
+1. **Function that takes only zero or one params and you return a React Element**, often JSX.  If the function takes zero or one params, there is **no migration needed** for that function.
     ```js
     export default (props) => <Component {...props} />;
     ```
+    
+2. **Function that takes only zero or one params and you return an Object (_not a React Element_)**.  If the function takes zero or one params, **you need to add one or two unused params so you have exactly 2 params** and then that function will be treated as a render function and it can return an Object rather than a React element. If you don't do this, you'll see this obscure error message:
+
+```
+  [SERVER] message: Objects are not valid as a React child (found: object with keys {renderedHtml}). If you meant to render a collection of children, use an array instead.
+  in YourComponentRenderFunction
+```
+  
+  So look in YourComponentRenderFunction and do this change
+
+```js
+   export default (props) => { renderedHTML: getRenderedHTML };
+```
+
+   To have exactly 2 arguments:
+   
+```js
+    export default (props, _railsContext) => { renderedHTML: getRenderedHTML };
+```    
+
+3. Function that takes **2 params** and returns **a React function or class component**. _Migration is needed as the older syntax returned a React Element._
+   A function component is a function that takes zero or one params and returns a React Element, like JSX. The correct syntax
+   looks like:
+    ```js
+    export default (props, railsContext) => () => <Component {{...props, railsContext}} />;
+    ```
+   Note, you cannot return a React Element (JSX). See below for the migration steps. If your function that took **two params returned
+   an Object**, then no migration is required.
+4. Function that takes **3 params** and uses the 3rd param, `domNodeId`, to call `ReactDOM.hydrate`. If the function takes 3 params, there is **no migration needed** for that function.
+5. ES6 or ES5 class. There is **no migration needed**.
+  
+Previously, with case number 2, you could return a React Element.
+
+The fix is simple. Here is an example of the change you'll do:
+
+![2020-07-07_09-43-51 (1)](https://user-images.githubusercontent.com/1118459/86927351-eff79e80-c0ce-11ea-9172-d6855c45e2bb.png)
+ 
 ##### Broken, as this function takes two params and it returns a React Element from a JSX Literal
 ```js
-export default (props, _railsContext) => <Component {...props} />;
+export default (props, railsContext) => <Component {{...props, railsContext} />;
 ```
 
 If you make this mistake, you'll get this warning
@@ -55,7 +100,7 @@ wrapper such that you're returning a function rather than a React Element, then:
 
 ## Upgrading rails/webpacker from v3 to v4
 ### Custom Webpack build file
-The default value for `extract_css` is **false** in `config/webpack.yml`. Custom webpack builds should set this value to true or else no CSS link tags are generated. You have a custom webpack build if you are not using [rails/webpacker](https://github.com/rails/webpacker to setup your Webpack configuration.
+The default value for `extract_css` is **false** in `config/webpack.yml`. Custom webpack builds should set this value to true or else no CSS link tags are generated. You have a custom webpack build if you are not using [rails/webpacker](https://github.com/rails/webpacker) to setup your Webpack configuration.
 
   ```yml
   default: &default

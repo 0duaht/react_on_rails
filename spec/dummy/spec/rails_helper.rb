@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 ENV["RAILS_ENV"] ||= "test"
-SERVER_BUNDLE_PATH = File.expand_path("../../public/webpack/" + ENV["RAILS_ENV"] + "/server-bundle.js", __FILE__)
+SERVER_BUNDLE_PATH = File.expand_path("../../public/webpack/#{ENV['RAILS_ENV']}/server-bundle.js", __FILE__)
 
 require_relative "simplecov_helper"
 require_relative "spec_helper"
@@ -34,7 +34,7 @@ require "capybara-screenshot/rspec"
 
 # Checks for pending migrations before tests are run.
 # If you are not using ActiveRecord, you can remove this line.
-ActiveRecord::Migration.maintain_test_schema!
+# ActiveRecord::Migration.maintain_test_schema!
 
 # Requires supporting files with custom matchers and macros, etc,
 # in ./support/ and its subdirectories.
@@ -42,10 +42,10 @@ Dir[Rails.root.join("spec", "support", "**", "*.rb")].sort.each { |f| require f 
 
 RSpec.configure do |config|
   # Ensure that if we are running js tests, we are using latest webpack assets
-  ReactOnRails::TestHelper.configure_rspec_to_compile_assets(config, :requires_webpack_assets)
-  config.define_derived_metadata(file_path: %r{spec/(system|requests|helpers)}) do |metadata|
-    metadata[:requires_webpack_assets] = true
-  end
+  # ReactOnRails::TestHelper.configure_rspec_to_compile_assets(config, :requires_webpack_assets)
+  # config.define_derived_metadata(file_path: %r{spec/(system|requests|helpers)}) do |metadata|
+  #   metadata[:requires_webpack_assets] = true
+  # end
 
   # Remove this line if you're not using ActiveRecord or ActiveRecord fixtures
   config.fixture_path = "#{::Rails.root}/spec/fixtures"

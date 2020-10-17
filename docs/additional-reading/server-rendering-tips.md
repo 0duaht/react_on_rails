@@ -13,7 +13,7 @@ Be sure to use mini_racer. See [issues/428](https://github.com/shakacode/react_o
 - You can conditionally avoid running code that references document by either checking if `window`
   is defined or using the "railsContext" 
   your top level react component. Since the passed in props Hash from the view helper applies to
-  client and server side code, the best way to do this is to use a render function.
+  client and server side code, the best way to do this is to use a Render-Function.
 - If you're serious about server rendering, it's worth the effort to have different entry points for client and server rendering. It's worth the extra complexity. The point is that you have separate files for top level client or server side, and you pass some extra option indicating that rendering is happening server side.
 - You can enable Node.js server rendering via [React on Rails Pro](https://github.com/shakacode/react_on_rails/wiki).
 
@@ -21,6 +21,9 @@ Be sure to use mini_racer. See [issues/428](https://github.com/shakacode/react_o
 
 1. First be sure your code works with server rendering disabled (`prerender: false`)
 2. Be sure that `config.trace` is true. You will get the server invocation code that renders your component. If you're not using Webpacker, you will also get the whole file used to setup the JavaScript context.
+
+## CSS
+Server bundles must always have CSS Extracted
 
 ## setTimeout, setInterval, and clearTimeout
 
